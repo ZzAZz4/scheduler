@@ -1,5 +1,6 @@
 import asyncio
-from schedule.scheduler import Scheduler, schedule
+from schedule.scheduler import Scheduler
+from schedule.callbacks import schedule
 import _thread
 
 
