@@ -1,13 +1,15 @@
+import asyncio
 from schedule.scheduler import Scheduler, schedule
 import _thread
 
 
-@schedule.periodic(period=2)
-def display(arg):
+@schedule.call(schedule.times(5))
+async def display(arg):
     print("Hello", arg)
+    await asyncio.sleep(1)
 
 
-@schedule.once()
+@schedule.call()
 def kill():
     _thread.interrupt_main()
 
@@ -15,9 +17,8 @@ def kill():
 class ExampleApp(Scheduler):
     def __init__(self):
         super().__init__()
-        hello_fut = self.schedule(display('A'), delay=0)
-        # desch_fut = self.schedule(lambda: self.remove(hello_fut), 5)
-        killp_fut = self.schedule(kill(), 5)
+        hello_fut = self.schedule(display('A'), after=0)
+        desch_fut = self.schedule(lambda: self.remove(hello_fut), after=3)
 
 
 def main():

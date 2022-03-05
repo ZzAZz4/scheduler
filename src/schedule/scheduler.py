@@ -1,15 +1,18 @@
 import asyncio
-from typing import Awaitable
+from typing import Any, Awaitable, Callable, Union
 from schedule.callbacks import schedule
 
 class Scheduler:
     def __init__(self):
         self.loop = asyncio.get_event_loop()
 
-    def schedule(self, cb: Awaitable, delay: float = 0) -> asyncio.Future:
+    def schedule(self, cb: Union[Callable, Awaitable], after: float = 0) -> asyncio.Future:
         async def wrapper():
-            await asyncio.sleep(delay)
-            await cb
+            await asyncio.sleep(after)
+            if isinstance(cb, Awaitable):
+                await cb
+            else:
+                cb()
         
         return asyncio.ensure_future(wrapper(), loop=self.loop)
     
@@ -17,6 +20,8 @@ class Scheduler:
     def remove(self, task: asyncio.Future) -> bool:
         return task.cancel()
     
+    def schedule_cb(self, cb: Callable[[], Any], after: float = 0) -> asyncio.Future:
+        return self.schedule(schedule.once(cb)(), after)
     
     def run(self):
         try:
