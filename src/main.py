@@ -1,15 +1,16 @@
 from schedule.scheduler import Scheduler
-from schedule.tasks import PeriodicCallback
+from schedule.callbacks import PeriodicCallback
 
 
-@PeriodicCallback.callback(period=1, times=5)
+@PeriodicCallback.create(period=2, times=5)
 def display(args):
     print(args)
 
 class App(Scheduler):
     def __init__(self):
         super().__init__()
-        self.schedule(0, display("Hello"))
+        hello_handle = self.schedule(0, display("Hello"))
+        self.schedule(1, lambda: hello_handle.cancel())
         
 
 if __name__ == "__main__":

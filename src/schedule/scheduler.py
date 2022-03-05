@@ -1,14 +1,13 @@
 import asyncio
-
-from schedule.tasks import BaseCallback
+from typing import Callable
+from schedule.callbacks import BaseCallback
 
 class Scheduler:
     def __init__(self):
         self.loop = asyncio.get_event_loop()
 
-    def schedule(self, delay: float, cb: BaseCallback) -> asyncio.TimerHandle:
-        cbe = lambda: cb(self)
-        return self.loop.call_later(delay, cbe)
+    def schedule(self, delay: float, cb: Callable) -> asyncio.TimerHandle:
+        return self.loop.call_later(delay, cb)
         
     def deschedule(self, task: asyncio.TimerHandle) -> None:
         task.cancel()
