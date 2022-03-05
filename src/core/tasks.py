@@ -5,7 +5,7 @@ from functools import wraps
 from typing import Any, Callable, Optional, Protocol
 
 @dataclass
-class BaseCallbackSettings:
+class CallbackParams:
     period: Optional[float] = None
     times: Optional[int] = None
 
@@ -17,9 +17,9 @@ class Context(Protocol):
         
 
 class BaseCallback(ABC):
-    def __init__(self, fn, settings: BaseCallbackSettings, *args, **kwargs):
+    def __init__(self, fn, settings: CallbackParams, *args, **kwargs):
         self.fn = fn
-        self.settings = settings
+        # self.settings = settings
         self.args = args
         self.kwargs = kwargs
 
@@ -29,7 +29,7 @@ class BaseCallback(ABC):
 
     @classmethod
     def callback(cls, **sargs):
-        settings = BaseCallbackSettings(**sargs)
+        settings = CallbackParams(**sargs)
         def decorator(func) -> Callable[..., 'BaseCallback']:
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -47,8 +47,9 @@ class SimpleCallback(BaseCallback):
 
 
 class PeriodicCallback(BaseCallback):
-    def __init__(self, fn: Callable, settings, *args, **kwargs):
+    def __init__(self, fn: Callable, settings: CallbackParams, *args, **kwargs):
         super().__init__(fn, settings, *args, **kwargs)
+        self.settings = settings
 
 
     def __call__(self, context: Context):
