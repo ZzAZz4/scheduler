@@ -1,28 +1,29 @@
-from schedule.scheduler import Scheduler
-from schedule.callbacks import PeriodicCallback, SimpleCallback
+from schedule.scheduler import Scheduler, schedule
 import _thread
 
-@PeriodicCallback.create(period=2, times=5)
-def display(args):
-    print(args)
-    
-@SimpleCallback.create()
+
+@schedule.periodic(period=2)
+def display(arg):
+    print("Hello", arg)
+
+
+@schedule.once()
 def kill():
     _thread.interrupt_main()
 
-class App(Scheduler):
+
+class ExampleApp(Scheduler):
     def __init__(self):
         super().__init__()
-        hello_key = self.schedule(0, display("Hello"))
-        
-        desch_key = self.schedule(5, SimpleCallback(lambda: self.remove(hello_key)))
-        
-        kill_key = self.schedule(8, kill())
-        
+        hello_fut = self.schedule(display('A'), delay=0)
+        # desch_fut = self.schedule(lambda: self.remove(hello_fut), 5)
+        killp_fut = self.schedule(kill(), 5)
+
+
 def main():
-    app = App()
+    app = ExampleApp()
     app.run()
-     
+
 
 if __name__ == "__main__":
     main()
