@@ -1,17 +1,13 @@
-from typing import Callable
 import asyncio
 
-from core.tasks import BaseTask, PeriodicTask
+from core.tasks import BaseCallback
 
 class Scheduler:
     def __init__(self):
         self.loop = asyncio.get_event_loop()
 
-    def schedule(self, delay: float, cb: BaseTask, *args, **kwargs) -> asyncio.TimerHandle:
-        if isinstance(cb, PeriodicTask):
-            cb = cb.bind(self.loop)
-        
-        cbe = lambda : cb(*args, **kwargs)    
+    def schedule(self, delay: float, cb: BaseCallback) -> asyncio.TimerHandle:
+        cbe = lambda: cb(self)
         return self.loop.call_later(delay, cbe)
         
     def deschedule(self, task: asyncio.TimerHandle) -> None:
