@@ -1,6 +1,6 @@
 import asyncio
 
-from core.tasks import BaseCallback
+from schedule.tasks import BaseCallback
 
 class Scheduler:
     def __init__(self):

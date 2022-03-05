@@ -1,5 +1,5 @@
-from core.scheduler import Scheduler
-from core.tasks import PeriodicCallback
+from schedule.scheduler import Scheduler
+from schedule.tasks import PeriodicCallback
 
 
 @PeriodicCallback.callback(period=1, times=5)
