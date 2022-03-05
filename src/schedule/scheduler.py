@@ -1,6 +1,5 @@
 import asyncio
 from typing import Awaitable, Callable
-from schedule.callbacks import BaseCallback
 
 class Scheduler:
     def __init__(self):

@@ -1,8 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractclassmethod
 from dataclasses import dataclass
 from functools import wraps
 from typing import Callable, Optional
 import asyncio
+
+
 class Params:
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -18,17 +20,10 @@ class BaseCallback(ABC):
     async def __call__(self):
         ...
 
-    @classmethod
-    def create(cls, *cargs, **ckwargs):
-        params = Params(*cargs, **ckwargs)
-
-        def decorator(func) -> Callable[..., 'BaseCallback']:
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                return cls(func, params, *args, **kwargs)
-            return wrapper
-        return decorator
-
+    @abstractclassmethod
+    def create(cls, *clargs, **ckwargs)\
+        -> Callable[..., Callable[..., 'BaseCallback']]:
+        ...
 
 class SimpleCallback(BaseCallback):
     def __init__(self, fn: Callable, _=None, *args, **kwargs):
@@ -36,7 +31,15 @@ class SimpleCallback(BaseCallback):
 
     async def __call__(self):
         self.fn(*self.args, **self.kwargs)
-
+        
+    
+    @classmethod
+    def create(cls, *cargs, **ckwargs):
+        def decorator(func) -> Callable[..., 'SimpleCallback']:
+            def wrapper(*args, **kwargs):
+                return cls(func, *args, **kwargs)
+            return wrapper
+        return decorator
 
 
 @dataclass
@@ -52,6 +55,15 @@ class PeriodicCallback(BaseCallback):
 
     async def __call__(self):
         await self.__schedule_runs()
+
+    @classmethod
+    def create(cls, period, times=None, *cargs, **ckwargs):
+        params = Params(period, times)
+        def decorator(func) -> Callable[..., 'PeriodicCallback']:
+            def wrapper(*args, **kwargs):
+                return cls(func, params, *args, **kwargs)
+            return wrapper
+        return decorator
 
     async def __schedule_runs(self):
         while self.__decrease_times():
